@@ -41,10 +41,10 @@ const Deferred =
   /** @class */
   (function () {
     function Deferred () {
-      // const _this = this
+      const _this = this
       this.promise = new Promise(function (resolve, reject) {
-        this.resolve = resolve
-        this.reject = reject
+        _this.resolve = resolve
+        _this.reject = reject
       })
     }
 
