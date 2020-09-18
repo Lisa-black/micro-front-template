@@ -1,32 +1,32 @@
-import _cloneDeep from "lodash/cloneDeep";
-var gloabalState = {};
-var deps = {}; // 触发全局监听
+import _cloneDeep from 'lodash/cloneDeep'
+let gloabalState = {}
+const deps = {} // 触发全局监听
 
-function emitGloabl(state, prevState) {
+function emitGloabl (state, prevState) {
   Object.keys(deps).forEach(function (id) {
     if (deps[id] instanceof Function) {
-      deps[id](_cloneDeep(state), _cloneDeep(prevState));
+      deps[id](_cloneDeep(state), _cloneDeep(prevState))
     }
-  });
+  })
 }
 
-export function initGlobalState(state) {
+export function initGlobalState (state) {
   if (state === void 0) {
-    state = {};
+    state = {}
   }
 
   if (state === gloabalState) {
-    console.warn('[qiankun] state has not changed！');
+    console.warn('[qiankun] state has not changed！')
   } else {
-    var prevGloabalState = _cloneDeep(gloabalState);
+    const prevGloabalState = _cloneDeep(gloabalState)
 
-    gloabalState = _cloneDeep(state);
-    emitGloabl(gloabalState, prevGloabalState);
+    gloabalState = _cloneDeep(state)
+    emitGloabl(gloabalState, prevGloabalState)
   }
 
-  return getMicroAppStateActions("gloabal-" + +new Date(), true);
+  return getMicroAppStateActions('gloabal-' + +new Date(), true)
 }
-export function getMicroAppStateActions(id, isMaster) {
+export function getMicroAppStateActions (id, isMaster) {
   return {
     /**
      * onStateChange 全局依赖监听
@@ -45,22 +45,22 @@ export function getMicroAppStateActions(id, isMaster) {
      * @param callback
      * @param fireImmediately
      */
-    onGlobalStateChange: function onGlobalStateChange(callback, fireImmediately) {
+    onGlobalStateChange: function onGlobalStateChange (callback, fireImmediately) {
       if (!(callback instanceof Function)) {
-        console.error('[qiankun] callback must be function!');
-        return;
+        console.error('[qiankun] callback must be function!')
+        return
       }
 
       if (deps[id]) {
-        console.warn("[qiankun] '" + id + "' gloabal listener already exists before this, new listener will overwrite it.");
+        console.warn("[qiankun] '" + id + "' gloabal listener already exists before this, new listener will overwrite it.")
       }
 
-      deps[id] = callback;
+      deps[id] = callback
 
-      var cloneState = _cloneDeep(gloabalState);
+      const cloneState = _cloneDeep(gloabalState)
 
       if (fireImmediately) {
-        callback(cloneState, cloneState);
+        callback(cloneState, cloneState)
       }
     },
 
@@ -72,44 +72,44 @@ export function getMicroAppStateActions(id, isMaster) {
      *
      * @param state
      */
-    setGlobalState: function setGlobalState(state) {
+    setGlobalState: function setGlobalState (state) {
       if (state === void 0) {
-        state = {};
+        state = {}
       }
 
       if (state === gloabalState) {
-        console.warn('[qiankun] state has not changed！');
-        return false;
+        console.warn('[qiankun] state has not changed！')
+        return false
       }
 
-      var changeKeys = [];
+      const changeKeys = []
 
-      var prevGloabalState = _cloneDeep(gloabalState);
+      const prevGloabalState = _cloneDeep(gloabalState)
 
       gloabalState = _cloneDeep(Object.keys(state).reduce(function (_gloabalState, changeKey) {
-        var _a;
+        let _a
 
         if (isMaster || changeKey in _gloabalState) {
-          changeKeys.push(changeKey);
-          return Object.assign(_gloabalState, (_a = {}, _a[changeKey] = state[changeKey], _a));
+          changeKeys.push(changeKey)
+          return Object.assign(_gloabalState, (_a = {}, _a[changeKey] = state[changeKey], _a))
         }
 
-        console.warn("[qiankun] '" + changeKey + "' not declared when init state\uFF01");
-        return _gloabalState;
-      }, gloabalState));
+        console.warn("[qiankun] '" + changeKey + "' not declared when init state\uFF01")
+        return _gloabalState
+      }, gloabalState))
 
       if (changeKeys.length === 0) {
-        console.warn('[qiankun] state has not changed！');
-        return false;
+        console.warn('[qiankun] state has not changed！')
+        return false
       }
 
-      emitGloabl(gloabalState, prevGloabalState);
-      return true;
+      emitGloabl(gloabalState, prevGloabalState)
+      return true
     },
     // 注销该应用下的依赖
-    offGlobalStateChange: function offGlobalStateChange() {
-      delete deps[id];
-      return true;
+    offGlobalStateChange: function offGlobalStateChange () {
+      delete deps[id]
+      return true
     }
-  };
+  }
 }
